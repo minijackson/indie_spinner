@@ -331,6 +331,7 @@ name = "indie_spinner"
 version = "0.1.0"
 dependencies = [
  "conrod 0.57.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

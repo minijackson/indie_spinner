@@ -5,3 +5,4 @@ authors = ["Minijackson <minijackson@riseup.net>"]
 
 [dependencies]
 conrod = {version = "^0.57.0", features = ["glium", "winit"]}
+lazy_static = "1.0"

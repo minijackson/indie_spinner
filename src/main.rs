@@ -1,8 +1,18 @@
+mod components;
+mod colors;
+
+use components::wheel;
+
 #[macro_use]
 extern crate conrod;
+#[macro_use]
+extern crate lazy_static;
 
-use conrod::{widget, Positionable, Widget};
 use conrod::backend::glium::glium::{self, Surface};
+
+widget_ids!(pub struct Ids {
+    wheel_parts[],
+});
 
 fn main() {
     const WIDTH: u32 = 800;
@@ -11,7 +21,7 @@ fn main() {
     // Build the window.
     let mut events_loop = glium::glutin::EventsLoop::new();
     let window = glium::glutin::WindowBuilder::new()
-        .with_title("Hello Conrod!")
+        .with_title("Indie Spinner")
         .with_dimensions(WIDTH, HEIGHT);
     let context = glium::glutin::ContextBuilder::new()
         .with_vsync(true)
@@ -22,9 +32,6 @@ fn main() {
     let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
 
     // Generate the widget identifiers.
-    widget_ids!(struct Ids {
-        wheel_parts[],
-    });
     let mut ids = Ids::new(ui.widget_id_generator());
 
     // Add a `Font` to the `Ui`'s `font::Map` from file.
@@ -85,40 +92,19 @@ fn main() {
             ui.handle_event(input);
 
             // Set the widgets.
-            let ui = &mut ui.set_widgets();
+            let mut ui = &mut ui.set_widgets();
 
-            let num_of_parts = 10;
-            ids.wheel_parts.resize(num_of_parts, &mut ui.widget_id_generator());
-
-            let window_size = ui.window_dim();
-            let min_window_size = window_size[0].min(window_size[1]);
-
-            const TWO_PI: f64 = 2.0 * std::f64::consts::PI;
-
-            let angle = TWO_PI / (num_of_parts as f64);
-
-            let mut i = 0;
-            for &id in ids.wheel_parts.iter() {
-
-                let angle_offset = angle * (i as f64);
-                let color = (i as f32) / (num_of_parts as f32);
-
-                widget::Circle::fill_with(min_window_size / 2.3f64, conrod::Color::Rgba(color, color, color, 1.0))
-                    .section(angle)
-                    .offset_radians(angle_offset)
-                    .middle_of(ui.window)
-                    .set(id, ui);
-
-                i += 1;
-            }
-
+            wheel::create_wheel(40, &mut ui, &mut ids);
         }
 
         // Draw the `Ui` if it has changed.
         if let Some(primitives) = ui.draw_if_changed() {
             renderer.fill(&display, primitives, &image_map);
             let mut target = display.draw();
-            target.clear_color(0.0, 0.0, 0.0, 1.0);
+
+            let background = colors::get_background("default").to_rgb();
+            target.clear_color(background.0 / 7f32, background.1 / 7f32, background.2 / 7f32, background.3 / 7f32);
+
             renderer.draw(&display, &mut target, &image_map).unwrap();
             target.finish().unwrap();
         }
