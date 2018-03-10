@@ -1,0 +1,7 @@
+[package]
+name = "indie_spinner"
+version = "0.1.0"
+authors = ["Minijackson <minijackson@riseup.net>"]
+
+[dependencies]
+conrod = {version = "^0.57.0", features = ["glium", "winit"]}
