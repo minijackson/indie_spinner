@@ -8,6 +8,7 @@ use std;
 pub fn create_wheel(num_of_parts: usize, ui: &mut UiCell, ids: &mut Ids) {
 
     ids.wheel_parts.resize(num_of_parts, &mut ui.widget_id_generator());
+    ids.wheel_labels.resize(num_of_parts, &mut ui.widget_id_generator());
 
     let window_size = ui.window_dim();
     let min_window_size = window_size[0].min(window_size[1]);
@@ -17,7 +18,7 @@ pub fn create_wheel(num_of_parts: usize, ui: &mut UiCell, ids: &mut Ids) {
     let angle = TWO_PI / (num_of_parts as f64);
 
     let mut i = 0;
-    for &id in ids.wheel_parts.iter() {
+    for (&part_id, &label_id)  in ids.wheel_parts.iter().zip(ids.wheel_labels.iter()) {
 
         let angle_offset = angle * (i as f64);
         let color = colors::get_additionnal("default", i);
@@ -26,7 +27,11 @@ pub fn create_wheel(num_of_parts: usize, ui: &mut UiCell, ids: &mut Ids) {
             .section(angle)
             .offset_radians(angle_offset)
             .middle_of(ui.window)
-            .set(id, ui);
+            .set(part_id, ui);
+
+        widget::Text::new("Hello, World!")
+            .down_from(part_id, 0f64)
+            .set(label_id, ui);
 
         i += 1;
     }

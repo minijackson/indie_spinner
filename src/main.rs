@@ -12,6 +12,7 @@ use conrod::backend::glium::glium::{self, Surface};
 
 widget_ids!(pub struct Ids {
     wheel_parts[],
+    wheel_labels[],
 });
 
 fn main() {
