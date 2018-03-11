@@ -1,3 +1,6 @@
+#![cfg_attr(test, feature(plugin))]
+#![cfg_attr(test, plugin(clippy))]
+
 mod components;
 mod colors;
 
@@ -6,13 +9,20 @@ use components::wheel;
 #[macro_use]
 extern crate conrod;
 #[macro_use]
+extern crate conrod_derive;
+#[macro_use]
 extern crate lazy_static;
 
+use conrod::{Widget, Positionable};
 use conrod::backend::glium::glium::{self, Surface};
 
-widget_ids!(pub struct Ids {
-    wheel_parts[],
-    wheel_labels[],
+//widget_ids!(pub struct Ids {
+    //wheel_parts[],
+    //wheel_labels[],
+//});
+
+widget_ids!(pub struct GlobalIds {
+    wheel,
 });
 
 fn main() {
@@ -30,13 +40,13 @@ fn main() {
     let display = glium::Display::new(window, context, &events_loop).unwrap();
 
     // construct our `Ui`.
-    let mut ui = conrod::UiBuilder::new([WIDTH as f64, HEIGHT as f64]).build();
+    let mut ui = conrod::UiBuilder::new([f64::from(WIDTH), f64::from(HEIGHT)]).build();
 
     // Generate the widget identifiers.
-    let mut ids = Ids::new(ui.widget_id_generator());
+    let ids = GlobalIds::new(ui.widget_id_generator());
 
     // Add a `Font` to the `Ui`'s `font::Map` from file.
-    const FONT_PATH: &'static str = "/usr/share/fonts/hack/Hack-Regular.ttf";
+    const FONT_PATH: &str = "/usr/share/fonts/hack/Hack-Regular.ttf";
     ui.fonts.insert_from_file(FONT_PATH).unwrap();
 
     // A type used for converting `conrod::render::Primitives` into `Command`s that can be used
@@ -62,26 +72,21 @@ fn main() {
             });
         }
 
-        // Process the events.
         for event in events.drain(..) {
 
-            // Break from the loop upon `Escape` or closed window.
-            match event.clone() {
-                glium::glutin::Event::WindowEvent { event, .. } => {
-                    match event {
-                        glium::glutin::WindowEvent::Closed |
-                            glium::glutin::WindowEvent::KeyboardInput {
-                                input: glium::glutin::KeyboardInput {
-                                    virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
-                                    ..
-                                },
+            if let glium::glutin::Event::WindowEvent { event, .. } = event.clone() {
+                match event {
+                    glium::glutin::WindowEvent::Closed |
+                        glium::glutin::WindowEvent::KeyboardInput {
+                            input: glium::glutin::KeyboardInput {
+                                virtual_keycode: Some(glium::glutin::VirtualKeyCode::Escape),
                                 ..
-                            } => break 'render,
-                        _ => (),
-                    }
+                            },
+                            ..
+                        } => break 'render,
+                    _ => (),
                 }
-                _ => (),
-            };
+            }
 
             // Use the `winit` backend feature to convert the winit event to a conrod input.
             let input = match conrod::backend::winit::convert_event(event, &display) {
@@ -95,7 +100,10 @@ fn main() {
             // Set the widgets.
             let mut ui = &mut ui.set_widgets();
 
-            wheel::create_wheel(40, &mut ui, &mut ids);
+            //wheel::create_wheel(40, &mut ui, &mut ids);
+            wheel::Wheel::new(vec![String::from("hello"), String::from("world"), String::from("goodbye")])
+                .middle_of(ui.window)
+                .set(ids.wheel, ui);
         }
 
         // Draw the `Ui` if it has changed.
